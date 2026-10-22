@@ -1,0 +1,9 @@
+# Dependencias y artefactos locales
+.DS_Store
+Thumbs.db
+*.log
+
+# Entornos (por si se agregan herramientas de lint en el futuro)
+node_modules/
+__pycache__/
+venv/

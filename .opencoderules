@@ -1,0 +1,30 @@
+# Arnés de IA — Cabañas Hueltén
+
+## 1. Alcance
+
+- Este repositorio pertenece a la org `IES9018` y aloja el sitio estático de **Cabañas Hueltén** (landing + solicitudes de reserva).
+- Archivos modificables: `index.html`, `styles.css`, `app.js`, `foto.png`, y la documentación bajo `docs/`.
+- Fuera de alcance: archivos de configuración de la organización, el historial de git y cualquier secreto real.
+
+## 2. Estándares técnicos obligatorios
+
+- HTML5 semántico, `lang="es"`, meta viewport y description presentes.
+- JavaScript vanilla ES2020 dentro de una IIFE con `"use strict"`; sin variables globales.
+- CSS con design tokens en `:root` (paleta wood/sunset/olive/cream); no hardcodear colores sueltos fuera de tokens.
+- Sin paso de build: el sitio debe abrirse desde `index.html` sin toolchain.
+- Dependencias solo por CDN de las librerías ya aprobadas (Bootstrap 5.3, FullCalendar 6, EmailJS 4, Google Fonts). **Nueva dependencia = nuevo ADR antes de agregarla.**
+- Commits convencionales (`feat:` / `fix:` / `docs:` / `chore:`) y entregas por rama `feature/*` + PR.
+
+## 3. Prácticas prohibidas
+
+- Hardcodear claves o tokens reales de EmailJS (u otro servicio): en el repo solo van placeholders (`YOUR_PUBLIC_KEY`, etc.).
+- Inyectar HTML con `innerHTML` usando datos no saneados del usuario (el formulario se envía como payload, no se re-renderiza).
+- Agregar frameworks (React, Vue, jQuery), bundlers o dependencias npm sin ADR previo.
+- Cambiar endpoints, claves de servicio o la política de fallback sin actualizar SPEC/ADR correspondiente.
+- Borrar la validación de fechas ocupadas o el fallback a correo/WhatsApp.
+
+## 4. Proceso
+
+- Toda funcionalidad nueva arranca como RF en `SPEC.md` antes de tocarse código.
+- Correcciones de usabilidad/auditoría: registrar en `docs/diseno/auditoria-heuristica.md` con el fix aplicado.
+- El formulario nunca debe romperse: si EmailJS falla o no está configurado, siempre queda visible el fallback.
