@@ -1,0 +1,334 @@
+openapi: 3.0.3
+info:
+  title: Cabañas Hueltén — Contratos de servicios externos
+  description: |
+    Contrato HTTP de la superficie externa que consume la landing de Cabañas Hueltén.
+
+    **Nota de alcance (trazable a ADR-005 y SPEC NG-01):** el sitio no tiene API propia
+    (es estático, sin backend). Este documento cubre las **5 operaciones HTTP críticas**
+    de las que dependen los flujos del Journey 1 (descubrir → evaluar destino → consultar
+    disponibilidad → enviar solicitud → fallback de contacto), con schemas, códigos de
+    error y esquema de credenciales. La única operación de **escritura** con datos del
+    usuario es `POST /api/v1.0/email/send` (EmailJS, RF-07).
+
+    Sin autenticación propia (NG-01): no existe JWT porque no hay usuarios ni sesión;
+    EmailJS se autentica con su clave pública gestionada por el SDK.
+  version: 1.0.0
+  contact:
+    name: Leonardo Krell — IES 9-018 (ADI 2026)
+  license:
+    name: All rights reserved — Cabañas Hueltén
+servers:
+  - url: https://api.emailjs.com
+    description: EmailJS — envío de solicitudes de reserva (RF-07)
+  - url: https://api.whatsapp.com
+    description: WhatsApp Click-to-Chat — fallback de contacto (RF-07)
+  - url: https://www.google.com
+    description: Google Maps — mapa embebido de ubicación (RF-01)
+  - url: https://images.unsplash.com
+    description: Unsplash — imágenes de galería y hero (RF-02, RF-03)
+  - url: https://cdn.jsdelivr.net
+    description: jsDelivr — assets de dependencias por CDN (RA-02)
+
+security:
+  - emailJsPublicKey: []
+
+tags:
+  - name: reservas
+    description: Flujo crítico de envío de solicitud de reserva
+  - name: contacto
+    description: Fallback de contacto directo
+  - name: contenido
+    description: Carga de contenido y dependencias del sitio
+
+paths:
+  /api/v1.0/email/send:
+    post:
+      tags: [reservas]
+      operationId: enviarSolicitudReserva
+      summary: Enviar solicitud de reserva al correo del establecimiento (RF-07)
+      description: |
+        Única escritura del sistema. El SDK `@emailjs/browser` invoca este endpoint con la
+        clave pública y el payload del formulario (`ReservationPayload`). Si la clave es
+        placeholder, `app.js` no llama y muestra el fallback (RF-13, CA-03).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailJsSendRequest'
+            example:
+              service_id: 'YOUR_SERVICE_ID'
+              template_id: 'YOUR_TEMPLATE_ID'
+              user_id: 'YOUR_PUBLIC_KEY'
+              template_params:
+                to_email: hueltencabanas@yahoo.com.ar
+                from_name: Valentina Ríos
+                from_email: valentina@example.com
+                phone: '+54 9 351 555 1234'
+                guests: '4'
+                check_in: '2026-07-05'
+                check_out: '2026-07-12'
+                message: 'Viajamos con dos niños y un perro chico.'
+      responses:
+        '200':
+          description: Solicitud aceptada y reenviada al correo del establecimiento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailJsSendResponse'
+        '400':
+          description: Payload inválido (campos requeridos faltantes o fechas mal formadas)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Clave pública inválida o dominio no autorizado en EmailJS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Límite de cuota/rate-limit de EmailJS alcanzado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Error interno del servicio EmailJS
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /send:
+    get:
+      tags: [contacto]
+      operationId: abrirWhatsAppFallback
+      summary: Fallback de contacto por WhatsApp (RF-07, RF-09)
+      description: |
+        Deep link de WhatsApp Click-to-Chat usado por el botón flotante y por la alerta de
+        fallback cuando EmailJS no está configurado. El sitio no parsea respuesta: el
+        navegador abre la app de WhatsApp.
+      parameters:
+        - name: phone
+          in: query
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9]{10,15}$'
+          example: '542604624809'
+        - name: text
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 1000
+          example: 'Hola, quiero consultar disponibilidad.'
+        - name: app_absent
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ['0', '1']
+      responses:
+        '200':
+          description: Página de confirmación de WhatsApp (abre la app o el web)
+        '400':
+          description: Número mal formado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /maps:
+    get:
+      tags: [contenido]
+      operationId: embeberMapaUbicacion
+      summary: Mapa embebido de Malargüe (RF-01)
+      description: |
+        iframe de Google Maps de la sección Ubicación. Carga lazy; no transporta datos del
+        usuario más allá del parámetro de ubicación público.
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+          example: 'Malargüe, Mendoza, Argentina'
+        - name: output
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: ['embed']
+      responses:
+        '200':
+          description: HTML del mapa embebido
+        '400':
+          description: Parámetros inválidos
+
+  /photo:
+    get:
+      tags: [contenido]
+      operationId: servirFotoGaleria
+      summary: Imagen de galería/hero desde Unsplash (RF-02, RF-03)
+      description: |
+        Entrega de imágenes referenciadas en `galleryItems` y en el hero (`styles.css`).
+        El sitio no recibe metadatos del usuario; el atributo `alt` es propio (texto local).
+      parameters:
+        - name: photoId
+          in: query
+          required: false
+          schema:
+            type: string
+          example: 'photo-1505693416388-ac5ce068fe85'
+        - name: auto
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [format]
+        - name: fit
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [crop]
+        - name: w
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 320
+            maximum: 1800
+          example: 1200
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 40
+            maximum: 90
+          example: 80
+      responses:
+        '200':
+          description: Imagen JPEG/AVIF
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Foto inexistente (rompe la card de galería — riesgo T-06 documentado)
+
+  /npm/{paquete}:
+    get:
+      tags: [contenido]
+      operationId: descargarDependenciaCdn
+      summary: Assets de dependencias por CDN (RA-02)
+      description: |
+        Carga de Bootstrap, Bootstrap Icons, FullCalendar, EmailJS SDK y Google Fonts
+        fijados por versión en `index.html`. Dependencia de cadena de suministro: amenaza
+        T-06 del threat model.
+      parameters:
+        - name: paquete
+          in: path
+          required: true
+          schema:
+            type: string
+          example: bootstrap@5.3.3/dist/css/bootstrap.min.css
+      responses:
+        '200':
+          description: Asset servido
+        '404':
+          description: Versión inexistente (el sitio queda sin estilos/lógica)
+
+components:
+  securitySchemes:
+    emailJsPublicKey:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: |
+        Clave pública de EmailJS (`YOUR_PUBLIC_KEY`), gestionada por el SDK
+        `@emailjs/browser`. Es una credencial de **restricción de dominio/cuota**, no de
+        identidad de usuario: por eso no hay JWT (no existe sesión ni usuarios, NG-01).
+        En el repo solo vive como placeholder (arnés §3, amenaza T-01).
+
+  schemas:
+    ReservationPayload:
+      type: object
+      description: "Datos del formulario de reserva (SPEC §5). Payload mínimo: solo lo necesario para responder la solicitud (T-05)."
+      required: [to_email, from_name, from_email, phone, guests, check_in, check_out]
+      properties:
+        to_email:
+          type: string
+          format: email
+          description: Correo del establecimiento (destino fijo)
+          example: hueltencabanas@yahoo.com.ar
+        from_name:
+          type: string
+          minLength: 3
+          maxLength: 80
+          example: Valentina Ríos
+        from_email:
+          type: string
+          format: email
+          example: valentina@example.com
+        phone:
+          type: string
+          pattern: '^[+0-9 ()-]{7,20}$'
+          example: '+54 9 351 555 1234'
+        guests:
+          type: string
+          enum: ['1', '2', '3', '4', '5', '6']
+          description: '6 = "6 o más"'
+        check_in:
+          type: string
+          format: date
+          example: '2026-07-05'
+        check_out:
+          type: string
+          format: date
+          example: '2026-07-12'
+        message:
+          type: string
+          maxLength: 500
+          example: 'Viajamos con dos niños.'
+    EmailJsSendRequest:
+      type: object
+      required: [service_id, template_id, user_id, template_params]
+      properties:
+        service_id:
+          type: string
+          example: YOUR_SERVICE_ID
+        template_id:
+          type: string
+          example: YOUR_TEMPLATE_ID
+        user_id:
+          type: string
+          description: Clave pública (placeholder en repo)
+          example: YOUR_PUBLIC_KEY
+        template_params:
+          $ref: '#/components/schemas/ReservationPayload'
+    EmailJsSendResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 200
+        text:
+          type: string
+          example: OK
+    Error:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: The template ID is not correct
