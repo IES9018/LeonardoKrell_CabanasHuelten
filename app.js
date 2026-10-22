@@ -230,7 +230,7 @@
     return `
       <div class="col-md-6 ${yearRound ? "col-lg-6" : "col-lg-4"}">
         <article class="card attraction-card">
-          <img src="${item.image}" alt="${item.title}" decoding="async" />
+          <img data-src="${item.image}" alt="${item.title}" decoding="async" />
           <div class="card-body">
             ${yearRound ? '<span class="badge year-round mb-2">Todo el año</span>' : ""}
             <h3 class="h5">${item.title}</h3>
@@ -246,6 +246,7 @@
     const seasonalHtml = data.items.map((item) => attractionCard(item)).join("");
     const yearRoundHtml = yearRoundAttractions.map((item) => attractionCard(item, true)).join("");
     seasonCards.innerHTML = `${seasonalHtml}${yearRoundHtml}`;
+    observeLazyImages(seasonCards);
   }
 
   function datesOverlap(startA, endA, startB, endB) {
