@@ -7,6 +7,7 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
+    "budgets": "node scripts/check-budgets.mjs",
     "lint:api": "redocly lint docs/arquitectura/api-contracts.yaml"
   },
   "devDependencies": {
