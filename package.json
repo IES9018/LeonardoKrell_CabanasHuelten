@@ -1,0 +1,16 @@
+{
+  "name": "cabanas-huelten",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Landing estática de Cabañas Hueltén — herramientas de desarrollo (tests y lint). El sitio NO usa este toolchain: se abre directo desde index.html.",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint:api": "redocly lint docs/arquitectura/api-contracts.yaml"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0",
+    "vitest": "^3.2.4"
+  }
+}
