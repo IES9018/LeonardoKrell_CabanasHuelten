@@ -11,6 +11,7 @@
     "lint:api": "redocly lint docs/arquitectura/api-contracts.yaml"
   },
   "devDependencies": {
+    "@redocly/cli": "^2.69.0",
     "jsdom": "^26.0.0",
     "vitest": "^3.2.4"
   }

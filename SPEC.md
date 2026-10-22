@@ -1,5 +1,7 @@
 # SPEC-000: Cabañas Hueltén — Landing y Solicitudes de Reserva
 
+> **Estado: vFinal — CONGELADA (2026-10-22).** No se agregan RF/RNF ni cambian contratos sin un PR que actualice esta sección, el ADR correspondiente y el changelog. Deuda de contenido solo vía Issue.
+
 ## 1. Contexto y Propósito
 
 Cabañas Hueltén es un alojamiento de montaña en Malargüe, Mendoza (piscina climatizada, chimenea, vistas a los Andes), a pocos minutos de Las Leñas, La Payunia y las termas del Cajón del Grande. El establecimiento necesita una presencia web que:
@@ -132,3 +134,18 @@ interface EmailJsConfig {
 | v3 | 2026-10-22 | Interfaces con criterios (TP3): RF-11..RF-13 en Gherkin, requisitos de accesibilidad AC-01..AC-03 y correcciones de la auditoría heurística |
 | v4 | 2026-10-22 | Contratos antes que código (TP4): referencia a `api-contracts.yaml` con schemas nombrados, threat model `docs/seguridad/threat-model-lite.md` (T-01..T-06) y arnés v3 con reglas NV-1..NV-3 |
 | v5 | 2026-10-22 | Mobile medible (TP5): RNF-01..RNF-05 con presupuestos y herramientas (ADR-006, `presupuestos-rendimiento.md`, `offline-sync.md` = Non-Goal, wireframes móviles <400 px) |
+| vFinal | 2026-10-22 | Congelamiento (TP6): matriz de trazabilidad ADR ↔ restricciones (§9), arnés vFinal, CI + release v0.1.0 |
+
+## 9. Congelamiento y trazabilidad final (vFinal)
+
+| ADR | Decisión | Restricción | RF/RNF/AC/Ng | Contrato/arnés |
+|-----|----------|-------------|--------------|----------------|
+| ADR-001 | Estático + CDNs aprobados | RA-01, RA-02 | RF-01..RF-10 · NG-01 | — |
+| ADR-002 | Single-page sin router ni frameworks | RA-03 | RF-02..RF-09 · NG-02 | — |
+| ADR-003 | Datos embebidos (`occupiedRanges`, `galleryItems`) | RA-04 | RF-04..RF-08 · NG-03 · CA-01/02 | — |
+| ADR-004 | Bootstrap + design tokens | — | RF-11..RF-13 · AC-02 | — |
+| ADR-005 | Sin backend; EmailJS + fallback; contrato primero | RA-05 · NV-1..NV-3 | RF-07 · RF-13 · NG-01 · NG-04 · NG-06 | `api-contracts.yaml` (T-01..T-06) |
+| ADR-006 | Responsive adaptativo; sin PWA | RNF-01..RNF-05 | RF-01 · RF-10 · CA-05 | `presupuestos-rendimiento.md` |
+| Arnés vFinal | IA con capas de verificación | RA-05 · NV-1..NV-3 (§3/§4) | RF-07 · RF-13 · AC-01..03 | `.opencoderules` |
+
+Cierre de la vFinal: 13 RF, 5 RNF, 3 AC, 5 RA, 6 ADR, 6 NG, 5 CA — todos trazables; los RNF pendientes de medición post-deploy se registran en `docs/deploy/deploy.md` (DEL-S3-03).
