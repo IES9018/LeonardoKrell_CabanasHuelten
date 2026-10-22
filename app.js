@@ -432,6 +432,10 @@
   }
 
   function bootExternalDeps() {
+    const iconsLink = document.createElement("link");
+    iconsLink.rel = "stylesheet";
+    iconsLink.href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css";
+    document.head.appendChild(iconsLink);
     const tasks = [];
     if (typeof FullCalendar === "undefined") {
       tasks.push(loadScript("https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"));
