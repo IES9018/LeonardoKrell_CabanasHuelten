@@ -1,9 +1,11 @@
-# Arnés de IA — Cabañas Hueltén
+# Arnés de IA — Cabañas Hueltén (vFinal · congelado)
+
+> **Versión:** vFinal (2026-10-22). Consolida v1 (TP1) + v2 (TP2) + v3 (TP4). Reglas únicas, sin duplicados. Cualquier cambio requiere PR + ADR/SPEC correspondiente.
 
 ## 1. Alcance
 
 - Este repositorio pertenece a la org `IES9018` y aloja el sitio estático de **Cabañas Hueltén** (landing + solicitudes de reserva).
-- Archivos modificables: `index.html`, `styles.css`, `app.js`, `foto.png`, y la documentación bajo `docs/`.
+- Archivos modificables: `index.html`, `styles.css`, `app.js`, `foto.png`, `tests/`, `scripts/`, y la documentación bajo `docs/`.
 - Fuera de alcance: archivos de configuración de la organización, el historial de git y cualquier secreto real.
 
 ## 2. Estándares técnicos obligatorios
@@ -11,26 +13,25 @@
 - HTML5 semántico, `lang="es"`, meta viewport y description presentes.
 - JavaScript vanilla ES2020 dentro de una IIFE con `"use strict"`; sin variables globales.
 - CSS con design tokens en `:root` (paleta wood/sunset/olive/cream); no hardcodear colores sueltos fuera de tokens.
-- Sin paso de build: el sitio debe abrirse desde `index.html` sin toolchain.
+- Sin paso de build: el sitio debe abrirse desde `index.html` sin toolchain (RA-01). Las `devDependencies` (Vitest, jsdom, Redocly) son de desarrollo y CI jamás alteran esa garantía.
 - Dependencias solo por CDN de las librerías ya aprobadas (Bootstrap 5.3, FullCalendar 6, EmailJS 4, Google Fonts). **Nueva dependencia = nuevo ADR antes de agregarla.**
-- Commits convencionales (`feat:` / `fix:` / `docs:` / `chore:`) y entregas por rama `feature/*` + PR.
+- Commits convencionales (`feat:` / `fix:` / `docs:` / `chore:`) y entregas por rama `feature/*` + PR con checklist del template.
 
 ## 3. Prácticas prohibidas
 
-- Hardcodear claves o tokens reales de EmailJS (u otro servicio): en el repo solo van placeholders (`YOUR_PUBLIC_KEY`, etc.).
-- Inyectar HTML con `innerHTML` usando datos no saneados del usuario (el formulario se envía como payload, no se re-renderiza).
+- **NV-1 — Cero secretos en el repo:** prohibido commitear claves, tokens o credenciales reales (EmailJS u otro servicio). Solo placeholders (`YOUR_PUBLIC_KEY`…); las claves reales viven en el panel del proveedor y en el checklist de despliegue (`docs/deploy/deploy.md`), nunca en git ni en logs.
+- **NV-2 — Validar y sanear toda entrada:** todo dato que entra al sistema (formulario, query params, datos externos) se valida antes de usarse (schema, longitud, formato de fecha, anti-solape) y se inserta en el DOM vía `textContent`/propiedades, salvo que el contenido sea código versionado y revisado en PR (`innerHTML` solo con contenido propio).
+- Inyectar HTML con `innerHTML` usando datos no saneados del usuario.
 - Agregar frameworks (React, Vue, jQuery), bundlers o dependencias npm sin ADR previo.
 - Cambiar endpoints, claves de servicio o la política de fallback sin actualizar SPEC/ADR correspondiente.
 - Borrar la validación de fechas ocupadas o el fallback a correo/WhatsApp.
+- Comunicar estado de avance (README/Issue/PR) sin evidencia verificable en el repo (incidente postmortem #1: alucinación de estado).
 
 ## 4. Proceso
 
+- **NV-3 — El contrato primero:** cualquier endpoint o servicio externo nuevo (o cambio de payload/errores) se registra en `docs/arquitectura/api-contracts.yaml` **antes** de implementarlo, y el YAML debe pasar `npm run lint:api` sin errores. Ninguna llamada de red nueva puede existir fuera del contrato.
 - Toda funcionalidad nueva arranca como RF en `SPEC.md` antes de tocarse código.
 - Correcciones de usabilidad/auditoría: registrar en `docs/diseno/auditoria-heuristica.md` con el fix aplicado.
 - El formulario nunca debe romperse: si EmailJS falla o no está configurado, siempre queda visible el fallback.
-
-## 5. Reglas de contrato y seguridad (v3 — TP4)
-
-- **NV-1 — Cero secretos en el repo:** prohibido commitear claves, tokens o credenciales reales (EmailJS u otro servicio). Solo placeholders (`YOUR_PUBLIC_KEY`…); las claves reales viven en el panel del proveedor y en el checklist de despliegue (`docs/deploy/deploy.md`), nunca en git ni en logs.
-- **NV-2 — Validar y sanear toda entrada:** todo dato que entra al sistema (formulario, query params, datos externos) se valida antes de usarse (schema, longitud, formato de fecha, anti-solape) y se inserta en el DOM vía `textContent`/propiedades, salvo que el contenido sea código versionado y revisado en PR (`innerHTML` solo con contenido propio).
-- **NV-3 — El contrato primero:** cualquier endpoint o servicio externo nuevo (o cambio de payload/errores) se registra en `docs/arquitectura/api-contracts.yaml` **antes** de implementarlo, y el YAML debe pasar `npx @redocly/cli lint` sin errores. Ninguna llamada de red nueva puede existir fuera del contrato.
+- Antes de cada PR: `npm test` (12/12), `npm run lint:api`, `npm run budgets` deben pasar localmente; el CI (`ci.yml`) los repite en el remoto.
+- Ninguna verificación de calidad puede saltarse con un comentario de IA; si un artefacto es obligatorio, debe existir y ser válido.
