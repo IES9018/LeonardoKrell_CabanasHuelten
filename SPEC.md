@@ -38,6 +38,16 @@ El sitio es una **landing estática de una sola página** (SPA de anclas) con l�
 - [x] **AC-02:** El contraste de texto y CTA cumple WCAG AA en los pares de color definidos por los design tokens; los estados interactivos no dependen solo del color (incluyen borde/fondo).
 - [x] **AC-03:** El formulario declara `label` asociado por `for`/`id` en todos los campos y `autocomplete` en nombre, email y teléfono; los modales usan `aria-labelledby` y `aria-hidden`.
 
+### Requisitos no funcionales medibles (RNF)
+
+> Presupuesto, herramienta y modo de ejecución detallados en [`docs/arquitectura/presupuestos-rendimiento.md`](./docs/arquitectura/presupuestos-rendimiento.md). RNF-03/RNF-04 se validan en CI (`node scripts/check-budgets.mjs`).
+
+- [ ] **RNF-01:** LCP < 2.5 s en simulación 4G/móvil (Lighthouse sobre la URL desplegada).
+- [ ] **RNF-02:** INP < 200 ms (Lighthouse).
+- [x] **RNF-03:** JavaScript propio (`app.js`) < 200 KB gzip — verificado en CI.
+- [x] **RNF-04:** HTML + CSS + JS propio < 100 KB gzip combinados — verificado en CI.
+- [ ] **RNF-05:** Puntaje Performance Lighthouse (mobile) ≥ 90 en la URL pública.
+
 ## 3. Non-Goals (Límites del Alcance)
 
 - **NG-01:** Sin backend ni base de datos: no hay persistencia server-side ni usuarios.
@@ -121,3 +131,4 @@ interface EmailJsConfig {
 | v2 | 2026-10-22 | Arquitectura visible (TP2): sección de Restricciones Arquitectónicas RA-01..RA-05 trazables a ADR-001/002/003 |
 | v3 | 2026-10-22 | Interfaces con criterios (TP3): RF-11..RF-13 en Gherkin, requisitos de accesibilidad AC-01..AC-03 y correcciones de la auditoría heurística |
 | v4 | 2026-10-22 | Contratos antes que código (TP4): referencia a `api-contracts.yaml` con schemas nombrados, threat model `docs/seguridad/threat-model-lite.md` (T-01..T-06) y arnés v3 con reglas NV-1..NV-3 |
+| v5 | 2026-10-22 | Mobile medible (TP5): RNF-01..RNF-05 con presupuestos y herramientas (ADR-006, `presupuestos-rendimiento.md`, `offline-sync.md` = Non-Goal, wireframes móviles <400 px) |
