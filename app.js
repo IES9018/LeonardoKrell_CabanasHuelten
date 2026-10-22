@@ -174,6 +174,29 @@
     return { interiores: "Interiores", exteriores: "Exteriores", piscina: "Piscina" }[key] || key;
   }
 
+  function observeLazyImages(root) {
+    const imgs = root.querySelectorAll("img[data-src]");
+    if (!("IntersectionObserver" in window)) {
+      imgs.forEach((img) => {
+        img.src = img.dataset.src;
+        img.removeAttribute("data-src");
+      });
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.src = entry.target.dataset.src;
+          entry.target.removeAttribute("data-src");
+          obs.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "400px 0px" }
+    );
+    imgs.forEach((img) => observer.observe(img));
+  }
+
   function renderGallery(filter = "all") {
     const items = galleryItems.filter((item) => filter === "all" || item.category === filter);
     galleryGrid.innerHTML = items
@@ -181,7 +204,7 @@
         (item) => `
         <div class="col-sm-6 col-lg-4">
           <article class="card gallery-card" data-index="${galleryItems.indexOf(item)}" role="button" tabindex="0">
-      <img src="${item.image}" alt="${item.title}" loading="lazy" decoding="async" />
+      <img data-src="${item.image}" alt="${item.title}" decoding="async" />
             <div class="card-body">
               <span class="badge badge-cat mb-2">${categoryLabel(item.category)}</span>
               <h3 class="h6 mb-0">${item.title}</h3>
@@ -190,6 +213,7 @@
         </div>`
       )
       .join("");
+    observeLazyImages(galleryGrid);
   }
 
   function openGalleryItem(index) {
