@@ -28,3 +28,9 @@
 - Toda funcionalidad nueva arranca como RF en `SPEC.md` antes de tocarse código.
 - Correcciones de usabilidad/auditoría: registrar en `docs/diseno/auditoria-heuristica.md` con el fix aplicado.
 - El formulario nunca debe romperse: si EmailJS falla o no está configurado, siempre queda visible el fallback.
+
+## 5. Reglas de contrato y seguridad (v3 — TP4)
+
+- **NV-1 — Cero secretos en el repo:** prohibido commitear claves, tokens o credenciales reales (EmailJS u otro servicio). Solo placeholders (`YOUR_PUBLIC_KEY`…); las claves reales viven en el panel del proveedor y en el checklist de despliegue (`docs/deploy/deploy.md`), nunca en git ni en logs.
+- **NV-2 — Validar y sanear toda entrada:** todo dato que entra al sistema (formulario, query params, datos externos) se valida antes de usarse (schema, longitud, formato de fecha, anti-solape) y se inserta en el DOM vía `textContent`/propiedades, salvo que el contenido sea código versionado y revisado en PR (`innerHTML` solo con contenido propio).
+- **NV-3 — El contrato primero:** cualquier endpoint o servicio externo nuevo (o cambio de payload/errores) se registra en `docs/arquitectura/api-contracts.yaml` **antes** de implementarlo, y el YAML debe pasar `npx @redocly/cli lint` sin errores. Ninguna llamada de red nueva puede existir fuera del contrato.

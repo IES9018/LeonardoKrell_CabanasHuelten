@@ -93,6 +93,8 @@ interface EmailJsConfig {
 }
 ```
 
+**Contrato de servicios externos:** la superficie HTTP completa que consumen estos tipos está especificada en [`docs/arquitectura/api-contracts.yaml`](./docs/arquitectura/api-contracts.yaml) (OpenAPI 3.0.3), con los schemas nombrados `ReservationPayload`, `EmailJsSendRequest`, `EmailJsSendResponse` y `Error`, las 5 operaciones críticas de los flujos del Journey 1 y el esquema de credenciales `emailJsPublicKey`. Regla NV-3 del arnés: sin contrato lint-clean, no hay implementación (ver ADR-005).
+
 ## 6. Criterios de Aceptación
 
 - [x] **CA-01:** El calendario renderiza todos los tramos de `occupiedRanges` como fondo ocupado y bloquea el clic sobre ellos.
@@ -118,3 +120,4 @@ interface EmailJsConfig {
 | v1 | 2026-10-22 | Especificación inicial (TP1): contexto, RF-01..RF-10, Non-Goals, contratos de datos y criterios de aceptación |
 | v2 | 2026-10-22 | Arquitectura visible (TP2): sección de Restricciones Arquitectónicas RA-01..RA-05 trazables a ADR-001/002/003 |
 | v3 | 2026-10-22 | Interfaces con criterios (TP3): RF-11..RF-13 en Gherkin, requisitos de accesibilidad AC-01..AC-03 y correcciones de la auditoría heurística |
+| v4 | 2026-10-22 | Contratos antes que código (TP4): referencia a `api-contracts.yaml` con schemas nombrados, threat model `docs/seguridad/threat-model-lite.md` (T-01..T-06) y arnés v3 con reglas NV-1..NV-3 |
