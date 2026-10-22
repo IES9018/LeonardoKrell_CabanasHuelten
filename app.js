@@ -1,12 +1,15 @@
 (() => {
   "use strict";
 
-  const EMAILJS_CONFIG = {
-    publicKey: "YOUR_PUBLIC_KEY",
-    serviceId: "YOUR_SERVICE_ID",
-    templateId: "YOUR_TEMPLATE_ID",
-    toEmail: "hueltencabanas@yahoo.com.ar",
-  };
+  const EMAILJS_CONFIG = Object.assign(
+    {
+      publicKey: "YOUR_PUBLIC_KEY",
+      serviceId: "YOUR_SERVICE_ID",
+      templateId: "YOUR_TEMPLATE_ID",
+      toEmail: "hueltencabanas@yahoo.com.ar",
+    },
+    (typeof window !== "undefined" && window.__EMAILJS_CONFIG__) || {}
+  );
 
   const occupiedRanges = [
     { start: "2026-09-12", end: "2026-09-16", title: "Ocupado" },
