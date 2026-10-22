@@ -18,6 +18,7 @@ info:
     name: Leonardo Krell — IES 9-018 (ADI 2026)
   license:
     name: All rights reserved — Cabañas Hueltén
+    url: https://github.com/IES9018/LeonardoKrell_CabanasHuelten
 servers:
   - url: https://api.emailjs.com
     description: EmailJS — envío de solicitudes de reserva (RF-07)
@@ -332,3 +333,4 @@ components:
         message:
           type: string
           example: The template ID is not correct
+
