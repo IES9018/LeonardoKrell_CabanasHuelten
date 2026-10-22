@@ -436,15 +436,24 @@
     iconsLink.rel = "stylesheet";
     iconsLink.href = "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css";
     document.head.appendChild(iconsLink);
-    const tasks = [];
-    if (typeof FullCalendar === "undefined") {
-      tasks.push(loadScript("https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"));
-    }
-    if (typeof window.emailjs === "undefined") {
-      tasks.push(loadScript("https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"));
-    }
-    Promise.all(tasks)
+
+    const bootstrapTask =
+      typeof bootstrap === "undefined"
+        ? loadScript("https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js")
+        : Promise.resolve();
+
+    bootstrapTask
       .catch(() => {})
+      .then(() => {
+        const tasks = [];
+        if (typeof FullCalendar === "undefined") {
+          tasks.push(loadScript("https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"));
+        }
+        if (typeof window.emailjs === "undefined") {
+          tasks.push(loadScript("https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"));
+        }
+        return Promise.all(tasks).catch(() => {});
+      })
       .then(() => {
         initEmailJs();
         if (typeof FullCalendar !== "undefined") initCalendar();
