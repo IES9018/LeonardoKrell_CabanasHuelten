@@ -431,6 +431,23 @@
     });
   }
 
+  function whenNearReservas(callback) {
+    const target = document.getElementById("reservationCalendar");
+    if (!target || !("IntersectionObserver" in window)) {
+      callback();
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        obs.disconnect();
+        callback();
+      },
+      { rootMargin: "600px 0px" }
+    );
+    observer.observe(target);
+  }
+
   function bootExternalDeps() {
     const iconsLink = document.createElement("link");
     iconsLink.rel = "stylesheet";
@@ -448,7 +465,7 @@
       .catch(() => {})
       .then(() => {
         initEmailJs();
-        if (typeof FullCalendar !== "undefined") initCalendar();
+        if (typeof FullCalendar !== "undefined") whenNearReservas(initCalendar);
       });
   }
 
