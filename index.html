@@ -97,10 +97,10 @@
       </div>
 
       <ul class="nav nav-pills gallery-filters justify-content-center mb-4" role="tablist">
-        <li class="nav-item"><button class="nav-link active" type="button" data-filter="all">Todas</button></li>
-        <li class="nav-item"><button class="nav-link" type="button" data-filter="interiores">Interiores</button></li>
-        <li class="nav-item"><button class="nav-link" type="button" data-filter="exteriores">Exteriores</button></li>
-        <li class="nav-item"><button class="nav-link" type="button" data-filter="piscina">Piscina</button></li>
+        <li class="nav-item"><button class="nav-link active" type="button" data-filter="all" aria-pressed="true">Todas</button></li>
+        <li class="nav-item"><button class="nav-link" type="button" data-filter="interiores" aria-pressed="false">Interiores</button></li>
+        <li class="nav-item"><button class="nav-link" type="button" data-filter="exteriores" aria-pressed="false">Exteriores</button></li>
+        <li class="nav-item"><button class="nav-link" type="button" data-filter="piscina" aria-pressed="false">Piscina</button></li>
       </ul>
 
       <div class="row g-3" id="galleryGrid"></div>
@@ -137,15 +137,15 @@
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label" for="guestName">Nombre</label>
-                <input class="form-control" id="guestName" name="guestName" type="text" required placeholder="Tu nombre completo" />
+                <input class="form-control" id="guestName" name="guestName" type="text" autocomplete="name" required placeholder="Tu nombre completo" />
               </div>
               <div class="col-md-6">
                 <label class="form-label" for="guestEmail">Email</label>
-                <input class="form-control" id="guestEmail" name="guestEmail" type="email" required placeholder="tu@email.com" />
+                <input class="form-control" id="guestEmail" name="guestEmail" type="email" autocomplete="email" required placeholder="tu@email.com" />
               </div>
               <div class="col-md-6">
                 <label class="form-label" for="guestPhone">Teléfono</label>
-                <input class="form-control" id="guestPhone" name="guestPhone" type="tel" required placeholder="+54 9 2604 ..." />
+                <input class="form-control" id="guestPhone" name="guestPhone" type="tel" autocomplete="tel" required placeholder="+54 9 2604 ..." />
               </div>
               <div class="col-md-6">
                 <label class="form-label" for="guests">Cantidad de huéspedes</label>
@@ -230,7 +230,7 @@
             <li><a href="#galeria">Galería</a></li>
             <li><a href="#reservas">Reservas</a></li>
             <li><a href="#ubicacion">Ubicación</a></li>
-            <li><a href="#" data-bs-toggle="modal" data-bs-target="#policiesModal">Políticas de reserva</a></li>
+            <li><a href="#policiesModal" data-bs-toggle="modal" data-bs-target="#policiesModal">Políticas de reserva</a></li>
           </ul>
         </div>
         <div class="col-md-4">

@@ -23,6 +23,21 @@ El sitio es una **landing estática de una sola página** (SPA de anclas) con l�
 - [x] **RF-09:** El sitio publica las políticas de reserva (horarios, seña, cancelaciones, mascotas) en un modal accesible.
 - [x] **RF-10:** El sitio es responsive (mobile-first) y navegable por teclado en todos los componentes interactivos.
 
+### Requerimientos de interfaz (criterios Gherkin)
+
+- [x] **RF-11:** Filtrado de galería.
+  - Given que estoy en la sección Galería, When hago clic en el filtro "Piscina", Then solo se muestran las cards de la categoría piscina y el filtro expone `aria-pressed="true"`.
+- [x] **RF-12:** Selección de fechas desde el calendario.
+  Given que estoy en la sección Reservas, When hago clic en un día libre del calendario, Then el campo check-in se completa con esa fecha; When hago clic en un segundo día posterior, Then check-out se completa y si el rango solapa una ocupación el sistema impide el envío con una alerta.
+- [x] **RF-13:** Envío del formulario con servicio no configurado.
+  Given que `EMAILJS_CONFIG.publicKey` es un placeholder, When envío el formulario válido, Then el sistema muestra una alerta de fallback con el correo del establecimiento y el enlace de WhatsApp, sin enviar la solicitud.
+
+### Requisitos de accesibilidad
+
+- [x] **AC-01:** Todos los componentes interactivos (filtros, cards de galería, switcher de temporada, botones de modal) son operables por teclado; las cards de galería manejan Enter y Espacio.
+- [x] **AC-02:** El contraste de texto y CTA cumple WCAG AA en los pares de color definidos por los design tokens; los estados interactivos no dependen solo del color (incluyen borde/fondo).
+- [x] **AC-03:** El formulario declara `label` asociado por `for`/`id` en todos los campos y `autocomplete` en nombre, email y teléfono; los modales usan `aria-labelledby` y `aria-hidden`.
+
 ## 3. Non-Goals (Límites del Alcance)
 
 - **NG-01:** Sin backend ni base de datos: no hay persistencia server-side ni usuarios.
@@ -102,3 +117,4 @@ interface EmailJsConfig {
 |---------|-------|--------|
 | v1 | 2026-10-22 | Especificación inicial (TP1): contexto, RF-01..RF-10, Non-Goals, contratos de datos y criterios de aceptación |
 | v2 | 2026-10-22 | Arquitectura visible (TP2): sección de Restricciones Arquitectónicas RA-01..RA-05 trazables a ADR-001/002/003 |
+| v3 | 2026-10-22 | Interfaces con criterios (TP3): RF-11..RF-13 en Gherkin, requisitos de accesibilidad AC-01..AC-03 y correcciones de la auditoría heurística |

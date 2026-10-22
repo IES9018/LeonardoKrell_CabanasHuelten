@@ -301,8 +301,12 @@
 
   document.querySelectorAll("[data-filter]").forEach((button) => {
     button.addEventListener("click", () => {
-      document.querySelectorAll("[data-filter]").forEach((btn) => btn.classList.remove("active"));
+      document.querySelectorAll("[data-filter]").forEach((btn) => {
+        btn.classList.remove("active");
+        btn.setAttribute("aria-pressed", "false");
+      });
       button.classList.add("active");
+      button.setAttribute("aria-pressed", "true");
       renderGallery(button.dataset.filter);
     });
   });
