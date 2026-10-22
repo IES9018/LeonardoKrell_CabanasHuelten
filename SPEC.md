@@ -85,3 +85,20 @@ interface EmailJsConfig {
 - [x] **CA-03:** Con claves de EmailJS en placeholder, el envío muestra alerta de fallback con correo y WhatsApp, sin errores en consola.
 - [x] **CA-04:** Los filtros de galería muestran exactamente las fotos de la categoría elegida.
 - [x] **CA-05:** El sitio es usable a 360 px de ancho (nav colapsada, formulario en una columna, calendario visible).
+
+## 7. Restricciones Arquitectónicas
+
+> Cada restricción es trazable a un ADR aceptado. Nada del stack puede cambiar sin actualizar primero el ADR y esta sección.
+
+- **RA-01** *(ADR-001)*: El sitio debe abrirse directamente desde `index.html`, sin paso de build ni toolchain Node obligatoria.
+- **RA-02** *(ADR-001)*: Dependencias solo por CDN, limitadas a Bootstrap 5.3, Bootstrap Icons, FullCalendar 6, @emailjs/browser 4 y Google Fonts. Nueva dependencia = ADR previo.
+- **RA-03** *(ADR-002)*: Arquitectura single-page sin router: una `index.html`, secciones por ancla y un único módulo IIFE en `app.js`. Prohibidos frameworks y bundlers.
+- **RA-04** *(ADR-003)*: Sin persistencia server-side. `occupiedRanges`, `galleryItems` y atractivos se versionan como constantes en `app.js`; el repo es el historial de disponibilidad.
+- **RA-05** *(arnés §3)*: `EMAILJS_CONFIG` solo admite placeholders en el repo; las claves reales se configuran en el entorno de despliegue, nunca en git.
+
+## 8. Changelog
+
+| Versión | Fecha | Motivo |
+|---------|-------|--------|
+| v1 | 2026-10-22 | Especificación inicial (TP1): contexto, RF-01..RF-10, Non-Goals, contratos de datos y criterios de aceptación |
+| v2 | 2026-10-22 | Arquitectura visible (TP2): sección de Restricciones Arquitectónicas RA-01..RA-05 trazables a ADR-001/002/003 |
