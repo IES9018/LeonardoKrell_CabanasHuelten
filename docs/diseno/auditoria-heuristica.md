@@ -1,45 +1,40 @@
-# Auditoría heurística — Portal de Calificaciones
+# Auditoría Heurística — Cabañas Hueltén
 
-> Revisión de las dos pantallas críticas del sistema según las 10 heurísticas de Nielsen.
+Método: revisión de la landing publicable (`index.html` + `app.js` + `styles.css`) contra las **10 heurísticas de Nielsen**, con foco en los dos flujos críticos del huésped (evaluar el lugar y enviar una solicitud). Fecha: 2026-10-22. Evaluador: Leonardo Krell (revisión + prueba manual en Chrome/Edge, teclado y móvil 360 px).
 
-## Pantallas revisadas
-- Pantalla 1: Mis calificaciones (estudiante)
-- Pantalla 2: Carga de calificaciones (docente)
+## Tabla de las 10 heurísticas
 
-## Tabla de auditoría
+| # | Heurística | Estado | Evidencia en el producto |
+|---|------------|--------|--------------------------|
+| H1 | **Visibilidad del estado del sistema** | ⚠️ → ✅ corregido | Filtros de galería y switcher de temporada comunican estado; el estado de los filtros ahora también expone `aria-pressed` (ver Hallazgo 1). El envío muestra "Enviando..." y alertas success/warning/danger. |
+| H2 | **Correspondencia entre el sistema y el mundo real** | ✅ | Lenguaje rioplatense ("Elegí una opción", "Probá otras noches"), términos del dominio (check-in, seña, temporada alta), iconos familiares. |
+| H3 | **Control y libertad del usuario** | ⚠️ → ✅ corregido | El usuario puede cancelar modales (Esc/backdrop), reintentar el envío y rehacer el rango de fechas. El link "Políticas de reserva" del footer saltaba al tope de la página (`href="#"`); corregido (Hallazgo 3). |
+| H4 | **Consistencia y estándares** | ✅ | Patrones Bootstrap (navbar, modales, pills de filtros), botón CTA consistente en hero/nav/formulario, mismas tarjetas para galería y atractivos. |
+| H5 | **Prevención de errores** | ✅ | `min` en los date inputs (hoy), `selectOverlap: false` en el calendario bloquea fechas ocupadas antes del submit, validación de solape antes del envío, placeholders de EmailJS detectados antes de enviar. |
+| H6 | **Reconocer antes que recordar** | ⚠️ → ✅ corregido | Leyenda Libre/Ocupado visible junto al calendario; el clic precarga check-in/out. Los campos de contacto no ofrecían autocompletado nativo; corregido con `autocomplete` (Hallazgo 2). |
+| H7 | **Flexibilidad y eficiencia de uso** | ✅ | Filtros de galería (atajos para llegar a "Piscina"), selección por arrastre en el calendario, WhatsApp flotante como canal rápido, anclas de nav para saltos directos. |
+| H8 | **Diseño estético y minimalista** | ✅ | Jerarquía tipográfica clara, una sola paleta (tokens), sin ruido decorativo que compita con el CTA de reserva. |
+| H9 | **Ayudar a reconocer, diagnosticar y recuperarse de errores** | ✅ | Alertas diferenciadas por severidad (`warning` = datos, `danger` = solape/envío) con mensajes accionables ("Probá otras noches", "escribinos por WhatsApp"). |
+| H10 | **Ayuda y documentación** | ✅ | Hint bajo el botón con el correo de destino, políticas completas en modal, datos de contacto y mapa en la sección Ubicación. |
 
-| Heurística de Nielsen | ¿Cumple? | Evidencia | Corrección propuesta |
-|:---|:---|:---|:---|
-| 1. Visibilidad del estado del sistema | Sí | La pantalla muestra el estado actual de la sesión y la materia seleccionada. | Mantener banners de éxito en la acción “guardar”, “subir CSV” y “editar”. |
-| 2. Relación entre el sistema y el mundo real | Sí | Se usan etiquetas que reflejan el dominio: "Mis calificaciones", "Docente", "Materia", "Nota". | Mantener vocabulario del colegio/IES sin jerga técnica. |
-| 3. Control y libertad del usuario | Sí | El usuario puede volver atrás o cambiar la materia sin perder el flujo. | Añadir botón “Cancelar” y “Volver” claros en formularios. |
-| 4. Consistencia y estándares | Sí | Se usan nombres iguales para “Nota”, “Materia”, “Promedio general”. | Reutilizar los mismos términos en todas las pantallas. |
-| 5. Prevención de errores | No | El formulario de carga no informa qué filas fueron rechazadas antes de guardar. | Mostrar prevalidación del CSV con errores por fila y validar rango 0–10 antes del envío. |
-| 6. Reconocimiento antes que recuerdo | No | El estudiante debe recordar qué materia estaba activa si el sistema no la marca claramente. | Resaltar la materia seleccionada y mostrar un resumen visible del contexto. |
-| 7. Flexibilidad y eficiencia de uso | Sí | En la vista de docente se puede cargar por CSV o manualmente. | Agregar atajos de teclado y foco ordenado. |
-| 8. Diseño estético y minimalista | Sí | Pantallas simples, sin ruido visual innecesario. | Mantener la jerarquía visual con CTA principal y secundario bien diferencia dos. |
-| 9. Ayuda a reconocer, diagnosticar y recuperar errores | No | Si la nota es inválida, el mensaje debe indicar que fue un valor fuera de rango y cómo corregirlo. | Reemplazar mensajes técnicos por textos del tipo: “La nota debe estar entre 0 y 10” y marcar el campo. |
-| 10. Ayuda y documentación | Sí | El flujo es suficientemente intuitivo para roles comunes. | Añadir un texto breve de ayuda: “Solo se permiten notas del 0 al 10”. |
+## Hallazgos detectados y corregidos (3)
 
-## Hallazgos reales detectados y correcciones aplicadas
+### Hallazgo 1 — Filtros de galería sin estado accesible
+- **Heurística:** H1 (visibilidad del estado) / H4.
+- **Problema:** el pill activo solo se comunicaba visualmente (clase `active`). Una persona con lector de pantalla o que navega por teclado no puede saber qué filtro está seleccionado.
+- **Corrección aplicada:** `aria-pressed` en cada botón `data-filter` (HTML) sincronizado con el estado en el handler de click (`app.js`). Ver commit de este PR.
 
-### 1) Falta de feedback de validación al cargar notas
-- **Hallazgo:** El usuario puede subir un CSV con filas inválidas y no sabe qué quedó aceptado o rechazado.
-- **Corrección aplicada al wireframe:** Se incluye una sección de “Resumen de validación” con filas aceptadas/rechazadas y detalle por error.
-- **Impacto:** reduce errores de carga y evita frustración.
+### Hallazgo 2 — Campos de contacto sin autocompletado
+- **Heurística:** H6 (reconocer antes que recordar).
+- **Problema:** en móvil, `guestName`, `guestEmail` y `guestPhone` no declaraban `autocomplete`, por lo que el teclado no ofrecía datos guardados del usuario: más tipeo y más fricción en el paso crítico de conversión.
+- **Corrección aplicada:** `autocomplete="name"`, `autocomplete="email"` y `autocomplete="tel"` en `index.html`.
 
-### 2) Mala claridad del contexto en pantalla de estudiante
-- **Hallazgo:** Si el usuario tiene muchas materias, pueden perderse en qué materia está mirando.
-- **Corrección aplicada al wireframe:** Se resalta la materia activa y el promedio se mantiene visible arriba de la lista.
-- **Impacto:** mejora orientación post-acción y reduce confusión.
+### Hallazgo 3 — Link "Políticas de reserva" con salto al tope
+- **Heurística:** H3 (control y libertad del usuario).
+- **Problema:** el enlace del footer usaba `href="#"`, que al activar el modal además desplazaba la página al inicio: el usuario pierde su posición y ve un "parpadeo" que no esperaba.
+- **Corrección aplicada:** `href="#policiesModal"` junto al trigger `data-bs-toggle="modal"`, eliminando el salto indeseado.
 
-### 3) Mensajes de error poco útiles
-- **Hallazgo:** Un valor fuera del rango podría aparecer como “error de validación” sin detalle actionable.
-- **Corrección aplicada al wireframe:** Se agrega mensaje específico junto al campo: “La nota debe estar entre 0 y 10”.
-- **Impacto:** permite corregir sin ayuda extra.
+## Qué quedó fuera de alcance (registrar, no corregir en este TP)
 
-## Recomendaciones finales
-- Mantener foco visible con outline nítido en todos los elementos interactivos.
-- Priorizar una sola acción principal por pantalla.
-- Reforzar accesibilidad: contraste AA y navegación con Tab/Enter/Escape.
-- En la carga por CSV, separar la acción de “subir archivo” de la confirmación final.
+- Las imágenes de galería son hotlinks a Unsplash: si el CDN falla, las cards quedan vacías (riesgo aceptado en ADR-001, mitigable migrando a assets propios).
+- La ocupación se edita manualmente en `app.js` (NG-03): no hay validación de formato en el repo más allá del contrato documentado (mitigación en el Journey 2 de `usuarios.md`).

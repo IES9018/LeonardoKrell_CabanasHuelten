@@ -1,50 +1,51 @@
-# C4 Contexto — Portal de Calificaciones
+# C4 Nivel 1 — Contexto del Sistema
 
-> **Nivel 1 — Diagrama de Contexto**
-> Última actualización: 2026-09-22 | Ref: SPEC v2, ADR-001, ADR-002
-
-## Descripción
-
-El Portal de Calificaciones es un sistema web que permite a estudiantes consultar sus notas y a docentes cargar y gestionar calificaciones dentro del instituto IES 9-018.
-
-## Diagrama
+Sistema: **Cabañas Hueltén — Landing y Solicitudes de Reserva**.
+Los diagramas usan Mermaid y renderizan en GitHub.
 
 ```mermaid
-C4Context
-    title Diagrama de Contexto — Portal de Calificaciones
+flowchart LR
+    subgraph actores
+        HUESPED["Huésped potencial<br/>(navegador web)"]
+        DUENO["Roberto — dueño<br/>(editor del repo vía git)"]
+    end
 
-    Person(estudiante, "Estudiante", "Consulta sus calificaciones, promedios y materias inscriptas")
-    Person(docente, "Docente", "Carga, edita y visualiza calificaciones de sus materias")
+    subgraph sistemas
+        SITIO["Sitio Cabañas Hueltén<br/>(landing estática)"]
+    end
 
-    System(portal, "Portal de Calificaciones", "Sistema web para gestión de calificaciones académicas. Permite autenticación con roles, carga de notas, consulta de promedios y gestión de inscripciones.")
+    subgraph externos
+        EMAILJS["EmailJS<br/>(envío de formularios)"]
+        CORREO["Correo del establecimiento<br/>(yahoo)"]
+        WHATSAPP["WhatsApp<br/>(deep link)"]
+        MAPS["Google Maps<br/>(iframe embebido)"]
+        CDNS["CDNs públicas<br/>(Bootstrap, FullCalendar,<br/>EmailJS, Google Fonts)"]
+        IMGS["Unsplash<br/>(imágenes de galería)"]
+    end
 
-    Rel(estudiante, portal, "Consulta calificaciones y promedios", "HTTPS")
-    Rel(docente, portal, "Carga y edita calificaciones", "HTTPS")
+    HUESPED -->|consulta y reserva| SITIO
+    DUENO -->|actualiza fechas,<br/>fotos y textos| SITIO
+    SITIO -->|solicitud de reserva| EMAILJS
+    EMAILJS -->|reenvía| CORREO
+    SITIO -->|enlace directo| WHATSAPP
+    SITIO -->|mapa embebido| MAPS
+    SITIO -->|recursos| CDNS
+    SITIO -->|hotlinks| IMGS
 ```
 
 ## Actores
 
-| Actor | Rol | Interacciones principales |
-|---|---|---|
-| Estudiante | Usuario autenticado con rol `estudiante` | Consulta sus calificaciones por materia, ve promedio general, visualiza materias inscriptas |
-| Docente | Usuario autenticado con rol `docente` | Visualiza materias que dicta, carga calificaciones (formulario o CSV), edita calificaciones propias, ve listas de estudiantes |
+| Actor | Rol | Interacción |
+|-------|-----|-------------|
+| Huésped | Visitante del sitio, cliente final | Navega, filtra galería, consulta el calendario, envía solicitud de reserva |
+| Dueño | Roberto, propietario de las cabañas | Mantiene el repo: actualiza `occupiedRanges`, galería, políticas y claves de EmailJS mediante commits/PRs |
 
 ## Sistemas externos
 
-Actualmente **no hay sistemas externos** integrados. La SPEC define como Non-Goal la integración con servicios externos (email, SMS, APIs de terceros). El portal opera de forma autónoma.
-
-## Restricciones de contexto
-
-- Todos los usuarios deben autenticarse con email y contraseña (RF-01 a RF-03)
-- Los roles se asignan automáticamente al crear la cuenta: `estudiante` o `docente`
-- No existe recuperación de contraseña (Non-Goal)
-- No existen notificaciones externas (Non-Goal)
-
-## Trazabilidad
-
-| Elemento | Fuente |
-|---|---|
-| Estudiante | SPEC.md RF-01 a RF-08 |
-| Docente | SPEC.md RF-09 a RF-14 |
-| Autenticación | SPEC.md RF-01 a RF-03, ADR-001 |
-| Sin sistemas externos | SPEC.md Non-Goals |
+| Sistema | Uso | Dependencia |
+|---------|-----|-------------|
+| EmailJS | Envío del formulario al correo del establecimiento | API pública del navegador; si no está configurado, fallback a `mailto:` y WhatsApp |
+| WhatsApp | Canal directo de contacto | Deep link `api.whatsapp.com/send` |
+| Google Maps | Mapa de ubicación en Malargüe | iframe embebido |
+| CDNs (jsDelivr, Google Fonts) | Bootstrap, Bootstrap Icons, FullCalendar, EmailJS SDK, tipografías | Sin caché local; el sitio requiere conexión |
+| Unsplash | Imágenes de la galería y del hero | Hotlinks con parámetros de tamaño |

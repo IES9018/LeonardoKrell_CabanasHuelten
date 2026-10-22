@@ -1,148 +1,120 @@
-# SPEC-001: Leonardo Krell / Portal de Calificaciones
-
-> **Versión:** v2 | **Última actualización:** 2026-09-22
+# SPEC-000: Cabañas Hueltén — Landing y Solicitudes de Reserva
 
 ## 1. Contexto y Propósito
 
-En el IES 9-018, estudiantes y docentes necesitan un lugar centralizado para ver y gestionar calificaciones de forma clara y organizada.
+Cabañas Hueltén es un alojamiento de montaña en Malargüe, Mendoza (piscina climatizada, chimenea, vistas a los Andes), a pocos minutos de Las Leñas, La Payunia y las termas del Cajón del Grande. El establecimiento necesita una presencia web que:
 
-**Problema:** Actualmente no hay un sistema digital que permita:
-- Docentes cargar calificaciones de forma ágil
-- Estudiantes ver sus notas en tiempo real
-- Validación automática de datos
+1. **Presente el alojamiento** (amenidades, galería, ubicación, políticas) para que un turista evalúe el lugar antes de reservar.
+2. **Muestre la disponibilidad** con un calendario de ocupación siempre visible.
+3. **Capture solicitudes de reserva** y las envíe al correo del establecimiento, sin requerir backend ni motor de pagos.
 
-**Solución:** Construir un portal web donde docentes cargan calificaciones y estudiantes las consultan, con autenticación y permisos específicos por rol.
-
----
+El sitio es una **landing estática de una sola página** (SPA de anclas) con lógica de cliente. El objetivo es convertir visitas en solicitudes de reserva medibles, con la menor superficie operativa posible para un proyecto de una sola persona.
 
 ## 2. Requerimientos Funcionales
 
-### 2.1 Autenticación
+- [x] **RF-01:** El sitio presenta el alojamiento con hero, franja de amenidades, sección de ubicación y datos de contacto (teléfono, correo, mapa).
+- [x] **RF-02:** El sitio muestra una galería de fotos con filtros por categoría (Todas · Interiores · Exteriores · Piscina).
+- [x] **RF-03:** El sitio permite ver el detalle de una foto en un lightbox (modal) con título y pie de foto.
+- [x] **RF-04:** El sitio muestra un calendario de ocupación mensual con los tramos reservados marcados visualmente.
+- [x] **RF-05:** El sitio permite seleccionar check-in y check-out del rango deseado haciendo clic o arrastrando sobre el calendario.
+- [x] **RF-06:** El sistema valida la solicitud de reserva: campos obligatorios, check-out posterior al check-in, fechas no anteriores a hoy y rango no superpuesto con tramos ocupados.
+- [x] **RF-07:** El sistema envía la solicitud de reserva al correo del establecimiento vía EmailJS; si el servicio no está configurado, informa el fallback a correo directo y WhatsApp.
+- [x] **RF-08:** El sitio publica atractivos turísticos de Malargüe por temporada (invierno/verano/otoño/primavera) más los de todo el año, en un modal conmutable.
+- [x] **RF-09:** El sitio publica las políticas de reserva (horarios, seña, cancelaciones, mascotas) en un modal accesible.
+- [x] **RF-10:** El sitio es responsive (mobile-first) y navegable por teclado en todos los componentes interactivos.
 
-- [ ] **RF-01:** El sistema autentica usuarios con email y contraseña
-- [ ] **RF-02:** El sistema asigna roles automáticamente: `estudiante`, `docente`
-- [ ] **RF-03:** El sistema mantiene la sesión del usuario durante la navegación
+### Requerimientos de interfaz (criterios Gherkin)
 
-### 2.2 Funcionalidades del Estudiante
+- [x] **RF-11:** Filtrado de galería.
+  - Given que estoy en la sección Galería, When hago clic en el filtro "Piscina", Then solo se muestran las cards de la categoría piscina y el filtro expone `aria-pressed="true"`.
+- [x] **RF-12:** Selección de fechas desde el calendario.
+  Given que estoy en la sección Reservas, When hago clic en un día libre del calendario, Then el campo check-in se completa con esa fecha; When hago clic en un segundo día posterior, Then check-out se completa y si el rango solapa una ocupación el sistema impide el envío con una alerta.
+- [x] **RF-13:** Envío del formulario con servicio no configurado.
+  Given que `EMAILJS_CONFIG.publicKey` es un placeholder, When envío el formulario válido, Then el sistema muestra una alerta de fallback con el correo del establecimiento y el enlace de WhatsApp, sin enviar la solicitud.
 
-- [ ] **RF-04:** Un estudiante puede ver todas sus calificaciones de todas las materias
-- [ ] **RF-05:** El estudiante ve la calificación agrupada por materia, con nombre del docente
-- [ ] **RF-06:** El estudiante ve un promedio general de todas las materias
-- [ ] **RF-07:** El estudiante NO puede ver calificaciones de otros estudiantes
-- [ ] **RF-08:** El estudiante NO puede editar, eliminar ni cargar calificaciones
+### Requisitos de accesibilidad
 
-### 2.3 Funcionalidades del Docente
-
-- [ ] **RF-09:** Un docente puede ver todas las materias que dicta
-- [ ] **RF-10:** El docente puede cargar calificaciones para una materia específica (formulario o CSV)
-- [ ] **RF-11:** El docente puede ver la lista de estudiantes de una materia con sus calificaciones
-- [ ] **RF-12:** El docente puede editar/actualizar calificaciones de sus propias materias
-- [ ] **RF-13:** El docente NO puede ver/editar materias de otros docentes
-- [ ] **RF-14:** El docente NO puede ver calificaciones de otras materias
-
-### 2.4 Validaciones y Negocio
-
-- [ ] **RF-15:** El sistema valida que las calificaciones estén entre 0 y 10
-- [ ] **RF-16:** El sistema rechaza calificaciones no numéricas o vacías
-- [ ] **RF-17:** El sistema NO permite que dos estudiantes tengan dos calificaciones para la misma materia
-
----
+- [x] **AC-01:** Todos los componentes interactivos (filtros, cards de galería, switcher de temporada, botones de modal) son operables por teclado; las cards de galería manejan Enter y Espacio.
+- [x] **AC-02:** El contraste de texto y CTA cumple WCAG AA en los pares de color definidos por los design tokens; los estados interactivos no dependen solo del color (incluyen borde/fondo).
+- [x] **AC-03:** El formulario declara `label` asociado por `for`/`id` en todos los campos y `autocomplete` en nombre, email y teléfono; los modales usan `aria-labelledby` y `aria-hidden`.
 
 ## 3. Non-Goals (Límites del Alcance)
 
-Lo que explícitamente NO se construirá en esta etapa:
-
-- **NG-01:** No hay panel de coordinador ni auditoría de cambios
-- **NG-02:** No hay notificaciones por email/SMS
-- **NG-03:** No hay gráficos ni análisis estadísticos
-- **NG-04:** No hay asistencia ni presencia de estudiantes
-- **NG-05:** No hay exportación de reportes en Excel o PDF
-- **NG-06:** No hay integración con sistemas externos
-- **NG-07:** No hay recuperación de contraseña automática
-- **NG-08:** No hay gestión de usuarios (crear/eliminar/editar perfiles)
-
----
+- **NG-01:** Sin backend ni base de datos: no hay persistencia server-side ni usuarios.
+- **NG-02:** Sin motor de reservas en tiempo real ni pagos online: la solicitud no confirma la estadía hasta respuesta humana; la seña se gestiona fuera del sitio.
+- **NG-03:** Sin autenticación ni panel de administración: la ocupación se actualiza editando el código versionado.
+- **NG-04:** Sin CMS: todo cambio de contenido es un commit en el repo.
+- **NG-05:** Sin multi-idioma: el sitio es solo español (rioplatense).
+- **NG-06:** Sin PWA ni experiencia offline: depende de CDNs, mapa embebido y EmailJS.
+- **NG-07:** Sin blog, reseñas ni motor de reseñas de terceros.
 
 ## 4. Stack Tecnológico y Restricciones
 
-### Backend
-- **Lenguaje:** Python
-- **Framework:** Django
-
-### Frontend
-- **Tecnología:** HTML5 + CSS3
-- **Framework CSS:** Bootstrap 5 (layout responsive y componentes)
-
-### Base de Datos
-- **Desarrollo:** SQLite
-
-### Restricciones Arquitectónicas
-
-Las siguientes restricciones están documentadas en ADRs aprobados y son de cumplimiento obligatorio:
-
-| Restricción | ADR | Detalle |
-|---|---|---|
-| Estilo arquitectónico | ADR-002 | Monolito modular con Django. No se permite fragmentar en microservicios o serverless sin ADR nuevo |
-| Persistencia | ADR-003 | SQLite + Django ORM. No se permite cambiar de DB sin ADR nuevo. Migración a PostgreSQL planificada como opción futura |
-| Stack tecnológico | ADR-001 | Python + Django + Bootstrap 5. No se permiten frameworks alternativos sin ADR nuevo |
-| Dependencias externas | ADR-002, ADR-003 | Todo framework, librería o servicio externo debe estar declarado en un ADR aprobado antes de usarlo |
-| Integridad de datos | ADR-003 | Todas las relaciones y constraints se implementan vía Django ORM (sin raw SQL) |
-
-**Diagramas de arquitectura:** Ver `docs/arquitectura/C4-contexto.md` y `docs/arquitectura/C4-contenedores.md`
-
----
+- Lenguaje/Framework: HTML5 + CSS3 + JavaScript vanilla (ES2020, IIFE `"use strict"`), sin paso de build.
+- UI: Bootstrap 5.3.3 + Bootstrap Icons (CDN), Google Fonts (Cormorant Garamond, Outfit).
+- Calendario: FullCalendar 6.1.15 (CDN).
+- Envío de formularios: @emailjs/browser v4 (CDN); claves como placeholders configurables.
+- Persistencia: ninguna (datos de ocupación y galería embebidos en `app.js`).
 
 ## 5. Contratos de Datos / Tipos
 
-### Entidades Principales
+```typescript
+type GalleryCategory = "interiores" | "exteriores" | "piscina";
 
-```python
-# ==================== USUARIO ====================
-class Usuario:
-    id: int
-    email: str (único, validado)
-    password: str (hasheada)
-    nombre_completo: str
-    rol: "estudiante" | "docente"
-    activo: bool (default True)
-    fecha_creacion: datetime
+interface OccupiedRange {
+  start: string; // ISO YYYY-MM-DD (inclusivo)
+  end: string;   // ISO YYYY-MM-DD (exclusivo)
+  title: string; // "Ocupado" | "Temporada alta"
+}
 
-# ==================== MATERIA ====================
-class Materia:
-    id: int
-    codigo: str (único, ej: "MAT-101")
-    nombre: str (ej: "Matemática II")
-    descripcion: str (opcional)
-    docente: FK(Usuario, rol=docente)
-    cuatrimestre: int (1 o 2, opcional)
-    año: int (ej: 2026)
-    activa: bool (default True)
-    fecha_creacion: datetime
+interface GalleryItem {
+  category: GalleryCategory;
+  title: string;
+  caption: string;
+  image: string; // URL
+}
 
-# ==================== INSCRIPCION ====================
-class Inscripcion:
-    id: int
-    estudiante: FK(Usuario, rol=estudiante)
-    materia: FK(Materia)
-    fecha_inscripcion: datetime
-    # Constraint: (estudiante, materia) es única
+interface ReservationPayload {
+  to_email: string;
+  from_name: string;
+  from_email: string;
+  phone: string;
+  guests: string; // "1".."6" ("6" = 6 o más)
+  check_in: string;  // ISO YYYY-MM-DD
+  check_out: string; // ISO YYYY-MM-DD
+  message: string;
+}
 
-# ==================== CALIFICACION ====================
-class Calificacion:
-    id: int
-    estudiante: FK(Usuario, rol=estudiante)
-    materia: FK(Materia)
-    nota: float (0-10, validado)
-    cargada_por: FK(Usuario, rol=docente)  # quién cargó
-    fecha_carga: datetime
-    fecha_ultima_modificacion: datetime (nullable)
-    observaciones: str (max 500, opcional)
-    # Constraint: (estudiante, materia) es única
+interface EmailJsConfig {
+  publicKey: string;  // placeholder: YOUR_PUBLIC_KEY
+  serviceId: string;  // placeholder: YOUR_SERVICE_ID
+  templateId: string; // placeholder: YOUR_TEMPLATE_ID
+  toEmail: string;    // hueltencabanas@yahoo.com.ar
+}
+```
 
----
+## 6. Criterios de Aceptación
 
-## 6. Changelog
+- [x] **CA-01:** El calendario renderiza todos los tramos de `occupiedRanges` como fondo ocupado y bloquea el clic sobre ellos.
+- [x] **CA-02:** Enviar un rango que solape un tramo ocupado muestra alerta y no dispara el envío.
+- [x] **CA-03:** Con claves de EmailJS en placeholder, el envío muestra alerta de fallback con correo y WhatsApp, sin errores en consola.
+- [x] **CA-04:** Los filtros de galería muestran exactamente las fotos de la categoría elegida.
+- [x] **CA-05:** El sitio es usable a 360 px de ancho (nav colapsada, formulario en una columna, calendario visible).
 
-| Versión | Fecha | Motivo | Cambios |
-|---|---|---|---|
-| v1 → v2 | 2026-09-22 | TP2: Arquitectura Visible | Agregada sección "Restricciones Arquitectónicas" con referencias a ADR-001/002/003. Se incorporan diagramas C4 como fuente de verdad de la arquitectura. Non-Goals revisados: NG-06 mantiene (sin integraciones externas), NG-08 mantiene (sin gestión de usuarios avanzada) |
+## 7. Restricciones Arquitectónicas
+
+> Cada restricción es trazable a un ADR aceptado. Nada del stack puede cambiar sin actualizar primero el ADR y esta sección.
+
+- **RA-01** *(ADR-001)*: El sitio debe abrirse directamente desde `index.html`, sin paso de build ni toolchain Node obligatoria.
+- **RA-02** *(ADR-001)*: Dependencias solo por CDN, limitadas a Bootstrap 5.3, Bootstrap Icons, FullCalendar 6, @emailjs/browser 4 y Google Fonts. Nueva dependencia = ADR previo.
+- **RA-03** *(ADR-002)*: Arquitectura single-page sin router: una `index.html`, secciones por ancla y un único módulo IIFE en `app.js`. Prohibidos frameworks y bundlers.
+- **RA-04** *(ADR-003)*: Sin persistencia server-side. `occupiedRanges`, `galleryItems` y atractivos se versionan como constantes en `app.js`; el repo es el historial de disponibilidad.
+- **RA-05** *(arnés §3)*: `EMAILJS_CONFIG` solo admite placeholders en el repo; las claves reales se configuran en el entorno de despliegue, nunca en git.
+
+## 8. Changelog
+
+| Versión | Fecha | Motivo |
+|---------|-------|--------|
+| v1 | 2026-10-22 | Especificación inicial (TP1): contexto, RF-01..RF-10, Non-Goals, contratos de datos y criterios de aceptación |
+| v2 | 2026-10-22 | Arquitectura visible (TP2): sección de Restricciones Arquitectónicas RA-01..RA-05 trazables a ADR-001/002/003 |
+| v3 | 2026-10-22 | Interfaces con criterios (TP3): RF-11..RF-13 en Gherkin, requisitos de accesibilidad AC-01..AC-03 y correcciones de la auditoría heurística |

@@ -1,45 +1,28 @@
-# INSTRUCTIONS.md — Guía para Agentes de IA
+# INSTRUCTIONS.md
 
-## 📌 Contexto del Proyecto
-Este repositorio aloja el **Portal de Calificaciones Académicas** (`LeonardoKrell_PortalDeCalificaciones`), desarrollado en el marco de la materia *Arquitectura y Diseño de Interfaces* (IES 9-018).
-El sistema permite a los docentes cargar y gestionar calificaciones y a los estudiantes consultar su desempeño académico y promedios en tiempo real.
+Este repositorio aloja el sitio **Cabañas Hueltén** (`LeonardoKrell_CabanasHuelten`), desarrollado en el marco de la materia *Arquitectura y Diseño de Interfaces* (IES 9-018).
 
-## 🛠 Stack Tecnológico
-- **Lenguaje:** Python 3.10+
-- **Framework Web:** Django
-- **Frontend:** HTML5 + CSS3 + Bootstrap 5
-- **Base de Datos:** SQLite (desarrollo, vía Django ORM)
-- Para conocer la justificación del stack y las alternativas evaluadas, consultar `docs/adr/ADR-001-stack-tecnologico.md`. Las decisiones de estilo arquitectónico y persistencia están en `docs/adr/ADR-002-estilo-arquitectonico.md` y `docs/adr/ADR-003-persistencia.md`.
+## Qué es este proyecto
 
-## 📐 Reglas y Contratos Obligatorios
-Cualquier modificación o generación de código realizada por la IA debe alinearse con los siguientes documentos:
-1. **`SPEC.md`**: Especificación declarativa con las reglas del sistema, requerimientos funcionales (RF-01 al RF-17), Non-Goals y restricciones arquitectónicas (ADRs vinculados).
-2. **`.opencoderules`**: Estándares de código, arquitectura, estructura del proyecto y reglas de seguridad (RBAC, CSRF, validación en servidor y ORM).
-3. **`docs/adr/`**: Registro de decisiones de arquitectura (ADR-001, ADR-002, ADR-003).
-4. **`docs/arquitectura/`**: Diagramas C4 (contexto y contenedores), fuente de verdad de la arquitectura. Ningún framework, base de datos o servicio externo puede aparecer en el código si no está declarado en un ADR o en los diagramas.
+Landing estática (HTML + CSS + JS vanilla) de un alojamiento de montaña en Malargüe, Mendoza, con galería filtrable, calendario de ocupación (FullCalendar) y formulario de reserva que envía por EmailJS con fallback a correo/WhatsApp.
 
-## 🚀 Comandos de Entorno y Verificación
-- **Ejecutar migraciones:**
-  ```bash
-  python manage.py migrate
-  ```
-- **Ejecutar tests:**
-  ```bash
-  python manage.py test --verbosity=2
-  ```
-- **Levantar servidor de desarrollo:**
-  ```bash
-  python manage.py runserver
-  ```
+## Fuente de verdad
 
-## 📁 Estructura Esperada
-- `portal_calificaciones/` — Configuración del proyecto Django
-- `usuarios/` — App de autenticación y gestión de usuarios
-- `calificaciones/` — App de carga y consulta de calificaciones
-- `docs/adr/` — Decisiones arquitectónicas registradas
+1. `SPEC.md` — requisitos funcionales (RF), non-goals y contratos de datos.
+2. `docs/adr/` — decisiones arquitectónicas aceptadas; nada se agrega al stack sin ADR.
+3. `.opencoderules` — reglas duras de codificación y proceso.
 
-## ⚠️ Restricciones
-- No implementar funcionalidad que no esté en un RF del SPEC.md
-- No agregar dependencias nuevas sin ADR previo
-- No desactivar protecciones de seguridad (CSRF, validaciones, etc.)
-- Todo output de IA debe ser revisado y entendido antes de commits
+## Comandos útiles
+
+```bash
+# sitio estático: abrir directo o servir en local
+python -m http.server 8000
+```
+
+No hay build, tests de runtime ni dependencias locales. Cualquier cambio debe dejar el sitio funcional abriendo `index.html`.
+
+## Restriciones
+
+- No introducir frameworks, bundlers ni dependencias nuevas sin ADR correspondiente.
+- Nunca commitear claves reales: `EMAILJS_CONFIG` solo acepta placeholders hasta tener claves de producción.
+- Toda entrega se hace por rama `feature/<tema>` + Pull Request hacia `main`.
