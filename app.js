@@ -175,11 +175,11 @@
   }
 
   function observeLazyImages(root) {
-    const imgs = root.querySelectorAll("img[data-src]");
+    const targets = root.querySelectorAll("[data-src]");
     if (!("IntersectionObserver" in window)) {
-      imgs.forEach((img) => {
-        img.src = img.dataset.src;
-        img.removeAttribute("data-src");
+      targets.forEach((el) => {
+        el.src = el.dataset.src;
+        el.removeAttribute("data-src");
       });
       return;
     }
@@ -194,7 +194,7 @@
       },
       { rootMargin: "400px 0px" }
     );
-    imgs.forEach((img) => observer.observe(img));
+    targets.forEach((el) => observer.observe(el));
   }
 
   function renderGallery(filter = "all") {
@@ -421,8 +421,41 @@
   checkInInput.min = today;
   checkOutInput.min = today;
 
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  function bootExternalDeps() {
+    const tasks = [];
+    if (typeof FullCalendar === "undefined") {
+      tasks.push(loadScript("https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"));
+    }
+    if (typeof window.emailjs === "undefined") {
+      tasks.push(loadScript("https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"));
+    }
+    Promise.all(tasks)
+      .catch(() => {})
+      .then(() => {
+        initEmailJs();
+        if (typeof FullCalendar !== "undefined") initCalendar();
+      });
+  }
+
   renderGallery();
   renderSeason("invierno");
-  initEmailJs();
-  initCalendar();
+
+  if (typeof FullCalendar !== "undefined" && typeof window.emailjs !== "undefined") {
+    initEmailJs();
+    initCalendar();
+  } else if (document.readyState === "complete") {
+    bootExternalDeps();
+  } else {
+    window.addEventListener("load", bootExternalDeps, { once: true });
+  }
 })();
