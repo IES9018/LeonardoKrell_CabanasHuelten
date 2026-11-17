@@ -37,10 +37,14 @@ Se ejecutan sobre la URL pública con Lighthouse CLI (mobile, throttling 4G por 
 | Métrica | Presupuesto | Herramienta | Resultado | Fecha |
 |---------|-------------|-------------|-----------|-------|
 | LCP (RNF-01) | < 2.5 s | Lighthouse mobile | _ver commit de mediciones_ | — |
-| INP (RNF-02) | < 200 ms | Lighthouse mobile | _ver commit de mediciones_ | — |
+| INP (RNF-02) | < 200 ms | Chrome UX Report (dato de campo); DevTools Performance para diagnóstico local | _pendiente de medición; registrar fuente y URL/periodo_ | — |
 | Performance (RNF-05) | ≥ 90 | Lighthouse mobile | _ver commit de mediciones_ | — |
 | JS propio (RNF-03) | < 200 KB gzip | `npm run budgets` | **4.6 KB** ✅ | 2026-10-22 |
 | Primer contacto (RNF-04) | < 100 KB gzip | `npm run budgets` | **11.0 KB** ✅ | 2026-10-22 |
+
+### Evidencia de INP
+
+INP es una métrica de campo: registrar el dato de Chrome UX Report para la URL pública y el periodo consultado, si está disponible. Una corrida Lighthouse de laboratorio no equivale a una medición de INP; no usar TBT como sustituto ni marcar el presupuesto como cumplido por esa corrida. Si no hay datos CrUX, dejar el resultado pendiente y usar el panel *Performance* de Chrome DevTools para diagnosticar las interacciones reales de la demo (filtrar galería, seleccionar fechas y enviar formulario), anotando esa evidencia como diagnóstico local, no como INP de campo.
 
 ## Operación (post-despliegue)
 
